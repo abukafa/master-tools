@@ -13,7 +13,7 @@ function LoginContent() {
   const handleGuestLogin = async () => {
     setIsLoading(true);
     const res = await signIn("anonymous", { redirect: false });
-    
+
     if (res?.error) {
       setIsLoading(false);
       // Anda bisa mengganti ini dengan komponen Toast
@@ -26,13 +26,15 @@ function LoginContent() {
   return (
     <div className="z-10 w-full max-w-md p-8 relative overflow-hidden rounded-3xl border border-border bg-card/60 backdrop-blur-xl shadow-2xl">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-      
+
       <div className="flex flex-col items-center gap-6 relative z-10 text-center">
         <h1 className="font-display text-4xl font-bold text-foreground">
-          Welcome to <span className="text-primary text-glow block mt-2">Lubna</span>
+          Welcome to{" "}
+          <span className="text-primary text-glow block mt-2">Lubna</span>
         </h1>
         <p className="text-muted-foreground font-sans text-sm">
-          Aesthetic and powerful suite of utilities designed for elegance and efficiency.
+          Aesthetic and powerful suite of utilities designed for elegance and
+          efficiency.
         </p>
 
         {error && (
@@ -42,8 +44,8 @@ function LoginContent() {
         )}
 
         <div className="w-full mt-4 space-y-4">
-          <Button 
-            onClick={handleGuestLogin} 
+          <Button
+            onClick={handleGuestLogin}
             disabled={isLoading}
             className="w-full h-12 rounded-full font-sans font-semibold tracking-wide bg-gradient-to-r from-primary to-secondary text-primary-foreground border-0 transition-all hover:scale-[1.02] hover:btn-glow cursor-pointer"
           >
@@ -52,12 +54,14 @@ function LoginContent() {
 
           <div className="relative flex items-center py-2">
             <div className="flex-grow border-t border-border"></div>
-            <span className="flex-shrink-0 mx-4 text-muted-foreground text-xs uppercase tracking-widest font-sans">Or</span>
+            <span className="flex-shrink-0 mx-4 text-muted-foreground text-xs uppercase tracking-widest font-sans">
+              Or
+            </span>
             <div className="flex-grow border-t border-border"></div>
           </div>
 
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             disabled
             className="w-full h-12 rounded-full font-sans font-medium border-border hover:bg-white/5 transition-all cursor-pointer"
           >
@@ -75,8 +79,14 @@ export default function LoginPage() {
       {/* Ambient Background Blur */}
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-secondary/15 rounded-full blur-[150px] pointer-events-none" />
-      
-      <Suspense fallback={<div className="text-primary text-glow font-display text-2xl">Loading...</div>}>
+
+      <Suspense
+        fallback={
+          <div className="text-primary text-glow font-display text-2xl">
+            Loading...
+          </div>
+        }
+      >
         <LoginContent />
       </Suspense>
     </main>

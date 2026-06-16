@@ -62,6 +62,8 @@ export default function PDFStudioPage() {
   const [signSize, setSignSize] = useState({ width: 150, height: 80 });
 
   const [isMounted, setIsMounted] = useState(false);
+  const pdfWrapperRef = useRef(null);
+  const [isPageRendered, setIsPageRendered] = useState(false);
   useEffect(() => setIsMounted(true), []);
 
   // === Handlers for Merger ===
@@ -165,14 +167,22 @@ export default function PDFStudioPage() {
       setSignFileUrl(URL.createObjectURL(file));
       setShowEditor(false);
       setSignatureImage(null);
+      setIsPageRendered(false);
     }
   };
 
   const handleSaveSignature = () => {
     if (sigCanvas.current.isEmpty())
       return alert("Silakan gambar tanda tangan Anda dulu.");
-    const dataUrl = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
+    
+    const trimmedCanvas = sigCanvas.current.getTrimmedCanvas();
+    const dataUrl = trimmedCanvas.toDataURL("image/png");
     setSignatureImage(dataUrl);
+
+    // Kunci aspek rasio pada bounding box agar gambar tidak gepeng di DOM
+    const ratio = trimmedCanvas.height / trimmedCanvas.width;
+    setSignSize({ width: 150, height: 150 * ratio });
+    
     setShowEditor(true);
   };
 
@@ -181,12 +191,11 @@ export default function PDFStudioPage() {
   };
 
   const onPageLoadSuccess = (page) => {
-    // Ambil ukuran canvas halaman yang dirender oleh react-pdf di layar
-    setPdfDims({ width: page.width, height: page.height });
+    setIsPageRendered(true);
   };
 
   const executeApplySignature = async () => {
-    if (!signFile || !signatureImage) return;
+    if (!signFile || !signatureImage || !pdfWrapperRef.current) return;
     setIsSigning(true);
     try {
       const signatureImageBytes = await fetch(signatureImage).then((res) =>
@@ -206,16 +215,21 @@ export default function PDFStudioPage() {
 
       const pngImage = await pdfDoc.embedPng(signatureImageBytes);
 
-      // Gunakan SATU skala (scaleX) agar rasio aspek (lonjong/melebar) tidak terdistorsi
-      const scale = originalWidth / pdfDims.width;
+      // Ambil ukuran canvas halaman yang DITAMPILKAN di layar (DOM)
+      const domWidth = pdfWrapperRef.current.offsetWidth;
+      const domHeight = pdfWrapperRef.current.offsetHeight;
 
-      // Konversi ukuran tanda tangan
-      const finalWidth = signSize.width * scale;
-      const finalHeight = signSize.height * scale;
+      // Hitung skala komparasi antara PDF asli dan Layar DOM
+      const scaleX = originalWidth / domWidth;
+      const scaleY = originalHeight / domHeight;
 
-      // Konversi koordinat (Ingat: pdf-lib (0,0) adalah di KIRI BAWAH)
-      const finalX = signPos.x * scale;
-      const finalY = originalHeight - (signPos.y + signSize.height) * scale;
+      // Konversi ukuran tanda tangan dari Piksel Layar -> Piksel PDF
+      const finalWidth = signSize.width * scaleX;
+      const finalHeight = signSize.height * scaleY;
+
+      // Konversi koordinat (pdf-lib (0,0) ada di KIRI BAWAH)
+      const finalX = signPos.x * scaleX;
+      const finalY = originalHeight - (signPos.y + signSize.height) * scaleY;
 
       page.drawImage(pngImage, {
         x: finalX,
@@ -473,17 +487,18 @@ export default function PDFStudioPage() {
                       </span>
                     </div>
 
-                    <div className="flex space-x-4 w-full md:w-auto">
+                    <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 w-full md:w-auto">
                       <Button
                         variant="outline"
                         onClick={() => setShowEditor(false)}
+                        className="w-full sm:w-auto"
                       >
                         Back
                       </Button>
                       <Button
                         onClick={executeApplySignature}
                         disabled={isSigning}
-                        className="w-full md:w-auto bg-gradient-to-r from-primary to-secondary text-white font-bold btn-glow"
+                        className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary text-white font-bold btn-glow"
                       >
                         {isSigning ? (
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -496,13 +511,10 @@ export default function PDFStudioPage() {
                   </div>
 
                   <div className="relative border-2 border-border rounded-xl overflow-hidden bg-muted/20 flex justify-center p-4">
-                    {/* Pembungkus relatif agar drag-and-drop bounding berfungsi dengan baik */}
                     <div
-                      className="relative shadow-2xl"
-                      style={{
-                        width: pdfDims.width > 0 ? pdfDims.width : "auto",
-                        minHeight: 400,
-                      }}
+                      ref={pdfWrapperRef}
+                      className="relative shadow-2xl inline-block"
+                      style={{ minHeight: 400 }}
                     >
                       <Document
                         file={signFileUrl}
@@ -518,13 +530,13 @@ export default function PDFStudioPage() {
                           renderTextLayer={false}
                           renderAnnotationLayer={false}
                           onLoadSuccess={onPageLoadSuccess}
-                          width={Math.min(window.innerWidth - 100, 800)} // Responsif max 800px
+                          width={Math.min(typeof window !== "undefined" ? window.innerWidth - 100 : 800, 800)}
                         />
                       </Document>
 
-                      {/* Komponen Signature Draggable */}
-                      {pdfDims.width > 0 && signatureImage && (
+                      {isPageRendered && signatureImage && (
                         <Rnd
+                          lockAspectRatio={true}
                           position={{ x: signPos.x, y: signPos.y }}
                           size={{
                             width: signSize.width,
@@ -549,10 +561,11 @@ export default function PDFStudioPage() {
                           bounds="parent"
                           className="border-2 border-primary/50 border-dashed rounded-lg group bg-black/5 hover:bg-primary/10 transition-colors"
                         >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={signatureImage}
                             alt="Signature"
-                            className="w-full h-full object-contain pointer-events-none"
+                            className="w-full h-full pointer-events-none"
                           />
                           <div className="absolute -top-6 left-0 bg-primary text-primary-foreground text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                             Drag or Resize Me
