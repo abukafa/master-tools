@@ -39,7 +39,7 @@ export default function TextExtractorPage() {
   );
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voices, setVoices] = useState([]);
-  const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
+  const [selectedVoiceName, setSelectedVoiceName] = useState("");
 
   // Audio to Text (STT) State
   const [sttText, setSttText] = useState("");
@@ -51,6 +51,10 @@ export default function TextExtractorPage() {
     const loadVoices = () => {
       const availableVoices = window.speechSynthesis.getVoices();
       setVoices(availableVoices);
+      if (availableVoices.length > 0 && !selectedVoiceName) {
+        // Set default voice automatically if not set
+        setSelectedVoiceName(availableVoices[0].name);
+      }
     };
     loadVoices();
     window.speechSynthesis.onvoiceschanged = loadVoices;
@@ -94,7 +98,7 @@ export default function TextExtractorPage() {
         recognitionRef.current.stop();
       }
     };
-  }, []);
+  }, [selectedVoiceName]);
 
   // Handlers
   const handleExtractWeb = async () => {
@@ -126,8 +130,9 @@ export default function TextExtractorPage() {
     }
 
     const utterance = new SpeechSynthesisUtterance(ttsText);
-    if (voices[selectedVoiceIndex]) {
-      utterance.voice = voices[selectedVoiceIndex];
+    const voice = voices.find(v => v.name === selectedVoiceName);
+    if (voice) {
+      utterance.voice = voice;
     }
 
     utterance.onend = () => setIsSpeaking(false);
@@ -292,22 +297,25 @@ export default function TextExtractorPage() {
                     <Label className="text-sm font-semibold tracking-wide">
                       Voice Profile
                     </Label>
-                    <select
-                      className="w-full h-12 rounded-xl bg-background/50 border border-border px-3 font-sans text-sm focus:outline-none focus:border-primary/50 text-foreground"
-                      value={selectedVoiceIndex}
-                      onChange={(e) =>
-                        setSelectedVoiceIndex(Number(e.target.value))
-                      }
+                    <Select 
+                      value={selectedVoiceName} 
+                      onValueChange={setSelectedVoiceName}
                     >
-                      {voices.length === 0 ? (
-                        <option>Loading voices...</option>
-                      ) : null}
-                      {voices.map((v, i) => (
-                        <option key={i} value={i}>
-                          {v.name} ({v.lang})
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="w-full h-12 rounded-xl bg-background/50 border-border">
+                        <SelectValue placeholder="Select a voice..." />
+                      </SelectTrigger>
+                      <SelectContent position="popper" className="max-h-[300px]">
+                        {voices.length === 0 ? (
+                          <SelectItem value="loading" disabled>Loading voices...</SelectItem>
+                        ) : (
+                          voices.map((v, i) => (
+                            <SelectItem key={i} value={v.name}>
+                              {v.name} ({v.lang})
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <Button
                     onClick={handleSpeak}
