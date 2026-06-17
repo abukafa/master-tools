@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import imageCompression from "browser-image-compression";
-import heic2any from "heic2any";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -63,6 +61,7 @@ export default function ImageConverterPage() {
         originalFile.name.toLowerCase().endsWith(".heic") ||
         originalFile.type === "image/heic";
       if (isHeic) {
+        const heic2any = (await import("heic2any")).default;
         const heicBlob = await heic2any({
           blob: originalFile,
           toType: "image/jpeg",
@@ -213,6 +212,7 @@ export default function ImageConverterPage() {
       }
 
       // 5. Proses Kompresi dan Cross-Format (JPG, PNG, WEBP) di Client-side
+      const imageCompression = (await import("browser-image-compression")).default;
       const options = {
         maxSizeMB: maxSizeMB[0],
         maxWidthOrHeight: 1920,

@@ -6,7 +6,7 @@ const rateLimitMap = new Map();
 const RATE_LIMIT = 20; // 20 requests
 const WINDOW_MS = 60 * 1000; // per 1 menit
 
-export default withAuth(
+const authMiddleware = withAuth(
   function middleware(req) {
     const res = NextResponse.next();
     const url = req.nextUrl;
@@ -82,6 +82,10 @@ export default withAuth(
     },
   }
 );
+
+export default function middleware(req, event) {
+  return authMiddleware(req, event);
+}
 
 export const config = {
   // Eksekusi middleware pada SELURUH route (kecuali static murni _next)
