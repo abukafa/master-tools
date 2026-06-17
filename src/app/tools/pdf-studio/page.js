@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { PDFDocument } from "pdf-lib";
 import JSZip from "jszip";
 import SignatureCanvas from "react-signature-canvas";
-import { Document, Page, pdfjs } from "react-pdf";
+import dynamic from "next/dynamic";
 import { Rnd } from "react-rnd";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,8 +28,9 @@ import {
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-// Konfigurasi Worker untuk react-pdf
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Matikan SSR untuk react-pdf karena menggunakan API DOM (DOMMatrix)
+const Document = dynamic(() => import("react-pdf").then((mod) => mod.Document), { ssr: false });
+const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), { ssr: false });
 
 export default function PDFStudioPage() {
   // === MERGER STATE ===
@@ -64,7 +65,14 @@ export default function PDFStudioPage() {
   const [isMounted, setIsMounted] = useState(false);
   const pdfWrapperRef = useRef(null);
   const [isPageRendered, setIsPageRendered] = useState(false);
-  useEffect(() => setIsMounted(true), []);
+  
+  useEffect(() => {
+    setIsMounted(true);
+    // Inisialisasi pdfjs worker secara dinamis hanya di sisi klien
+    import("react-pdf").then(({ pdfjs }) => {
+      pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    });
+  }, []);
 
   // === Handlers for Merger ===
   const handleAddMergeFiles = (e) => {
