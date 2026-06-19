@@ -6,6 +6,7 @@ import Link from "next/link";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
 import { LogOut, Crown, Zap, User as UserIcon } from "lucide-react";
+import UpgradeButton from "@/components/UpgradeButton";
 
 import { TIER_LIMITS } from "@/lib/rate-limit-mongo";
 
@@ -82,11 +83,9 @@ export default async function DashboardPage() {
             {!isPremium && (
               <div className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/30 p-6 rounded-3xl relative overflow-hidden">
                 <Crown className="absolute right-[-10px] bottom-[-10px] w-24 h-24 text-primary/10 rotate-[-15deg]" />
-                <h3 className="font-display text-xl font-bold mb-2">Upgrade to Premium</h3>
-                <p className="text-sm text-muted-foreground mb-6">Dapatkan akses tak terbatas ke semua layanan AI dan hilangkan limit harian Anda.</p>
-                <Button className="w-full rounded-full bg-primary text-primary-foreground hover:scale-105 transition-transform">
-                  Upgrade Now
-                </Button>
+                <h3 className="font-display text-xl font-bold mb-2">Support Lubna Tools</h3>
+                <p className="text-sm text-muted-foreground mb-6">Dukung kami agar aplikasi ini dapat terus dikembangkan dan tetap 100% gratis untuk semua orang.</p>
+                <UpgradeButton />
               </div>
             )}
 

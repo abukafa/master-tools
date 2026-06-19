@@ -3,7 +3,6 @@ import { getToken } from "next-auth/jwt";
 
 export async function POST(req) {
   try {
-    const pdfParse = require("pdf-parse");
     const token = await getToken({ req });
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -25,8 +24,10 @@ export async function POST(req) {
     let extractedText = "";
 
     if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-      const data = await pdfParse(buffer);
-      extractedText = data.text;
+      const { PDFParse } = require("pdf-parse");
+      const parser = new PDFParse();
+      await parser.load(buffer);
+      extractedText = await parser.getText();
     } else {
       return NextResponse.json({ error: "Format file tidak didukung oleh parser ini" }, { status: 400 });
     }
