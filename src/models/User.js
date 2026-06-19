@@ -12,6 +12,12 @@ const UserSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },
+    name: {
+      type: String,
+    },
+    image: {
+      type: String,
+    },
     tier: {
       type: String,
       enum: ["free", "premium"],

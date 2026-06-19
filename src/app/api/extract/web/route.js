@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { JSDOM } from "jsdom";
+import { parseHTML } from "linkedom";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import { convert } from "html-to-text";
@@ -23,8 +23,8 @@ export async function POST(req) {
     }
 
     const html = await response.text();
-    const doc = new JSDOM(html, { url });
-    const reader = new Readability(doc.window.document);
+    const { document } = parseHTML(html);
+    const reader = new Readability(document);
     const article = reader.parse();
 
     if (!article) {

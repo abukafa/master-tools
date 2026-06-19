@@ -66,9 +66,11 @@ const authMiddleware = withAuth(
       authorized: ({ req, token }) => {
         const { pathname } = req.nextUrl;
         
-        // API, Login, Static Assets diizinkan tanpa NextAuth (Rate limit tetap berlaku sesuai logika di atas)
+        // API v1, Login, Static Assets, dan Webhooks diizinkan tanpa NextAuth
+        // Namun /api/v2 (layanan AI berbayar) WAJIB menggunakan Token Sesi
         if (
-          pathname.startsWith('/api') || 
+          (pathname.startsWith('/api') && !pathname.startsWith('/api/v2')) || 
+          pathname.startsWith('/api/webhooks') ||
           pathname.startsWith('/login') || 
           pathname.startsWith('/_next') ||
           pathname === '/favicon.ico'
