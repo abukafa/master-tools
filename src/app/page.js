@@ -1,7 +1,43 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(authOptions);
+  
+  // Periksa apakah pengguna adalah Guest atau belum login sama sekali
+  const isGuestOrPublic = !session || session.user?.role === "anonymous";
+
+  const tools = [
+    { title: "Image Converter", desc: "Convert & compress images effortlessly.", href: "/tools/image-converter", isPremium: false },
+    { title: "QR Generator", desc: "Create elegant QR codes.", href: "/tools/qr-generator", isPremium: false },
+    { title: "Code Formatter", desc: "Beautify your snippets.", href: "/tools/code-formatter", isPremium: false },
+    { title: "PDF Studio", desc: "Securely split and merge PDFs.", href: "/tools/pdf-studio", isPremium: false },
+    { title: "Text Suite", desc: "Extract, read, dan dictate text.", href: "/tools/text-extractor", isPremium: false },
+    { title: "Color Generator", desc: "Neon palettes & smooth CSS gradients.", href: "/tools/color-generator", isPremium: false },
+    
+    // V2 Tools (Requires Google Login)
+    { 
+      title: "Media Downloader", 
+      desc: "Unduh video & audio sosial media (Premium).", 
+      href: isGuestOrPublic ? "/login" : "/tools/video-downloader", 
+      isPremium: true 
+    },
+    { 
+      title: "Video to Text", 
+      desc: "Transkrip video dengan AI Whisper (Premium).", 
+      href: isGuestOrPublic ? "/login" : "/tools/video-to-text", 
+      isPremium: true 
+    },
+    { 
+      title: "AI BG Remover", 
+      desc: "Hapus background foto instan (Premium).", 
+      href: isGuestOrPublic ? "/login" : "/tools/ai-background-remover", 
+      isPremium: true 
+    },
+  ];
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background relative overflow-hidden">
       {/* Ambient Background Blur */}
@@ -22,21 +58,17 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl mt-8">
-          {[
-            { title: "Image Converter", desc: "Convert & compress images effortlessly.", href: "/tools/image-converter" },
-            { title: "QR Generator", desc: "Create elegant QR codes.", href: "/tools/qr-generator" },
-            { title: "Code Formatter", desc: "Beautify your snippets.", href: "/tools/code-formatter" },
-            { title: "Text Suite", desc: "Extract, read, and dictate text.", href: "/tools/text-extractor" },
-            { title: "PDF Studio", desc: "Securely split and merge PDFs.", href: "/tools/pdf-studio" },
-            { title: "Color Generator", desc: "Neon palettes & smooth CSS gradients.", href: "/tools/color-generator" },
-          ].map((tool, i) => (
+          {tools.map((tool, i) => (
             <Link
               key={i}
               href={tool.href}
-              className="group block relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:border-primary/50 hover:bg-card/80 backdrop-blur-sm cursor-pointer text-left"
+              className={`group block relative overflow-hidden rounded-2xl border ${tool.isPremium ? 'border-primary/30' : 'border-border'} bg-card p-6 shadow-sm transition-all hover:border-primary/50 hover:bg-card/80 backdrop-blur-sm cursor-pointer text-left`}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-              <h3 className="font-display text-2xl font-semibold mb-2 relative z-10 text-foreground group-hover:text-primary transition-colors">{tool.title}</h3>
+              <h3 className="font-display text-2xl font-semibold mb-2 relative z-10 text-foreground group-hover:text-primary transition-colors">
+                {tool.title}
+                {tool.isPremium && <span className="ml-2 text-[10px] uppercase tracking-wider bg-primary/20 text-primary px-2 py-1 rounded-full align-middle">Pro</span>}
+              </h3>
               <p className="text-sm text-muted-foreground relative z-10 font-sans">
                 {tool.desc}
               </p>
@@ -45,9 +77,19 @@ export default function Home() {
         </div>
 
         <div className="mt-8">
-          <Button size="lg" className="rounded-full px-8 font-semibold tracking-wide bg-gradient-to-r from-primary to-secondary text-primary-foreground border-0 transition-all hover:scale-105 hover:btn-glow">
-            Join Lubna Circle
-          </Button>
+          {isGuestOrPublic ? (
+            <Link href="/login">
+              <Button size="lg" className="rounded-full px-8 font-semibold tracking-wide bg-gradient-to-r from-primary to-secondary text-primary-foreground border-0 transition-all hover:scale-105 hover:btn-glow">
+                Join Lubna Circle
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/dashboard">
+              <Button size="lg" className="rounded-full px-8 font-semibold tracking-wide bg-gradient-to-r from-primary to-secondary text-primary-foreground border-0 transition-all hover:scale-105 hover:btn-glow">
+                Go to Dashboard
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </main>
