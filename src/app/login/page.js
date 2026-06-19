@@ -35,8 +35,8 @@ function LoginContent() {
           </span>
         </h1>
         <p className="text-muted-foreground font-sans text-sm">
-          Aesthetic and powerful suite of utilities designed for elegance and
-          efficiency.
+          Aesthetic and powerful suite of utilities tool designed for elegance,
+          productivity, and work efficiency.
         </p>
 
         {error && (

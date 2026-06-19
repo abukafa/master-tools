@@ -2,6 +2,11 @@
 const nextConfig = {
   serverExternalPackages: ['youtube-dl-exec', 'pdf-parse'],
   reactCompiler: true,
+  experimental: {
+    outputFileTracingIncludes: {
+      '/api/v2/downloader': ['./node_modules/youtube-dl-exec/bin/**/*'],
+    },
+  },
   async headers() {
     return [
       {

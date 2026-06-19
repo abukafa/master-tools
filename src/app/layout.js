@@ -13,7 +13,7 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  title: "Lubna - Master Tools",
+  title: "Lubna Tools Master",
   description: "Aesthetic master tools for media and text processing.",
 };
 
@@ -24,10 +24,11 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
       className={`${jakarta.variable} ${outfit.variable} dark antialiased h-full`}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground font-sans">
-        <NextAuthProvider>
-          {children}
-        </NextAuthProvider>
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col bg-background text-foreground font-sans"
+      >
+        <NextAuthProvider>{children}</NextAuthProvider>
       </body>
     </html>
   );

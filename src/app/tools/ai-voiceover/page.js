@@ -2,22 +2,35 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Mic, Play, Download, AlertCircle, ArrowLeft } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Loader2,
+  Mic,
+  Play,
+  Download,
+  AlertCircle,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function VoiceoverPage() {
   const [text, setText] = useState("");
   const [language, setLanguage] = useState("id");
   const [speed, setSpeed] = useState("normal");
-  
+
   const [loading, setLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
   const [error, setError] = useState(null);
 
   const handleGenerate = async () => {
     if (!text.trim()) return;
-    
+
     setLoading(true);
     setError(null);
     setAudioUrl(null);
@@ -26,7 +39,7 @@ export default function VoiceoverPage() {
       const res = await fetch("/api/v2/voiceover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, language, speed })
+        body: JSON.stringify({ text, language, speed }),
       });
 
       const data = await res.json();
@@ -62,14 +75,17 @@ export default function VoiceoverPage() {
             AI Voiceover <span className="text-primary text-glow">Studio</span>
           </h1>
           <p className="text-muted-foreground mt-2 font-sans max-w-xl">
-            Ubah naskah atau teks Anda menjadi suara narasi (*Voiceover*) secara otomatis dalam hitungan detik.
+            Ubah naskah atau teks Anda menjadi suara narasi (Voiceover) secara
+            otomatis dalam hitungan detik.
           </p>
         </div>
 
         <div className="p-8 rounded-3xl border border-border bg-card/50 backdrop-blur-sm space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Skrip / Teks Narasi</label>
-            <textarea 
+            <label className="text-sm font-medium text-foreground">
+              Skrip / Teks Narasi
+            </label>
+            <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Ketik teks yang ingin disuarakan di sini..."
@@ -83,8 +99,14 @@ export default function VoiceoverPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Bahasa & Aksen</label>
-              <Select value={language} onValueChange={setLanguage} disabled={loading}>
+              <label className="text-sm font-medium text-foreground">
+                Bahasa & Aksen
+              </label>
+              <Select
+                value={language}
+                onValueChange={setLanguage}
+                disabled={loading}
+              >
                 <SelectTrigger className="w-full h-12 bg-background border-input rounded-xl">
                   <SelectValue placeholder="Pilih Bahasa" />
                 </SelectTrigger>
@@ -96,9 +118,11 @@ export default function VoiceoverPage() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Kecepatan Suara</label>
+              <label className="text-sm font-medium text-foreground">
+                Kecepatan Suara
+              </label>
               <Select value={speed} onValueChange={setSpeed} disabled={loading}>
                 <SelectTrigger className="w-full h-12 bg-background border-input rounded-xl">
                   <SelectValue placeholder="Pilih Kecepatan" />
@@ -119,9 +143,9 @@ export default function VoiceoverPage() {
           )}
 
           <div className="pt-4 border-t border-border flex justify-end">
-            <Button 
+            <Button
               size="lg"
-              onClick={handleGenerate} 
+              onClick={handleGenerate}
               disabled={loading || !text.trim()}
               className="rounded-full px-8 bg-primary text-primary-foreground hover:scale-105 transition-transform h-12"
             >
@@ -144,24 +168,26 @@ export default function VoiceoverPage() {
               <h3 className="font-display font-semibold text-lg text-primary flex items-center gap-2">
                 <Play className="w-5 h-5" /> Hasil Voiceover
               </h3>
-              
+
               <audio controls className="w-full" src={audioUrl}>
                 Browser Anda tidak mendukung elemen audio.
               </audio>
 
               <div className="flex justify-end pt-2">
-                <a 
-                  href={audioUrl} 
+                <a
+                  href={audioUrl}
                   download={`voiceover-${new Date().getTime()}.mp3`}
                 >
-                  <Button variant="outline" className="rounded-full gap-2 hover:bg-primary hover:text-primary-foreground">
+                  <Button
+                    variant="outline"
+                    className="rounded-full gap-2 hover:bg-primary hover:text-primary-foreground"
+                  >
                     <Download className="w-4 h-4" /> Unduh MP3
                   </Button>
                 </a>
               </div>
             </div>
           )}
-
         </div>
       </div>
     </main>
